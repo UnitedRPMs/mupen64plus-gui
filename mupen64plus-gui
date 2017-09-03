@@ -1,0 +1,68 @@
+#!/bin/bash
+
+# Run only one instance, thanks Todd T 
+
+lockdir=/tmp
+if [ -w /var/lock ]; then lockdir=/var/lock ; fi
+self=`basename $0`
+pidf="$lockdir/LCK..$self.uid$EUID.pid"
+exec 221>${pidf}
+flock --exclusive --nonblock 221 ||
+{
+        echo "Already running"
+        exit 1
+}
+echo $$ | awk '{printf "%10u\n",$0}' >&221
+####
+
+#LIBS
+if [ `getconf LONG_BIT` = "64" ]; then
+libdir=lib64
+else
+libdir=lib
+fi
+
+name=mupen64plus-gui
+_libdir=/usr/${libdir}
+_local_datadir=$HOME/.local/share
+buildroot=${_local_datadir}/${name}
+check=20
+
+find ${buildroot} -ctime +$check -exec rm -rf {} \;
+
+if [ ! -d ${buildroot} ] || [ ! -f ${buildroot}/${name} ]; then
+mkdir -p ${buildroot}
+
+ls ${_libdir}/mupen64plus-gui/ > libdirA_mupen-gui
+ls ${_libdir}/mupen64plus/ > libdirA_mupen
+
+file=libdirA_mupen-gui
+while IFS= read -r line; do
+        # display $line or do something with $line
+    cp -f ${_libdir}/mupen64plus-gui/$line ${buildroot}/$line
+done <"$file"
+
+file=libdirA_mupen
+while IFS= read -r line; do
+        # display $line or do something with $line
+    cp -n ${_libdir}/mupen64plus/$line ${buildroot}/$line
+done <"$file"
+
+chmod a+x ${buildroot}/${name}
+pushd ${buildroot}
+./mupen64plus-gui
+exit 0
+popd
+#
+else
+ls ${_libdir}/mupen64plus/ > libdirA_mupen
+file=libdirA_mupen
+while IFS= read -r line; do
+        # display $line or do something with $line
+    cp -n ${_libdir}/mupen64plus/$line ${buildroot}/$line
+done <"$file"
+pushd ${buildroot}
+./mupen64plus-gui
+exit 0
+popd
+fi
