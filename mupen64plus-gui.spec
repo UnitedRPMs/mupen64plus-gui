@@ -66,7 +66,7 @@ install -dm 755 %{buildroot}/%{_bindir} \
 	%{buildroot}/usr/share/pixmaps 
 
 cp -rf mupen64plus/* %{buildroot}/%{_libdir}/%{name}/
-chmod a+x %{buildroot}/%{_libdir}/%{name}/mupen64plus
+#chmod a+x %{buildroot}/%{_libdir}/%{name}/mupen64plus
 
 cp -f mupen64plus-gui/build/mupen64plus-gui %{buildroot}/%{_libdir}/%{name}
 chmod a+x %{buildroot}/%{_libdir}/%{name}/mupen64plus-gui
